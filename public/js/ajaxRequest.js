@@ -6,11 +6,13 @@ $(document).ready(function () {
     const endpointBalance = "balance";
     const endpointServices = "services";
     const endpointBanner = "banner";
+    const endpointHistory = "transaction/history";
 
     const apiUrlProfile = envUrl + endpointProfile;
     const apiUrlBalance = envUrl + endpointBalance;
     const apiUrlServices = envUrl + endpointServices;
     const apiUrlBanner = envUrl + endpointBanner;
+    const apiUrlHistory = envUrl + endpointHistory;
 
     function ajaxProfile() {
         $.ajax({
@@ -152,8 +154,15 @@ $(document).ready(function () {
         $('#btnModalConfirm').off('click');
     }
 
-    function formatRupiah(nominal) {
-        return `Rp${nominal.toLocaleString('id-ID')}`;
+    function formatRupiah(amount) {
+        const formattedAmount = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+
+        return formattedAmount.substring(3);
     }
 
     function ajaxBalance() {
@@ -173,7 +182,7 @@ $(document).ready(function () {
                         "Authorization": 'Bearer ' + token,
                     },
                     success: function (response) {
-                        saldoValue.text(response.data.balance);
+                        saldoValue.text(`${formatRupiah(response.data.balance)}`);
                         saldoVisible = true;
                     },
                     error: function (xhr, status, error) {
@@ -244,6 +253,44 @@ $(document).ready(function () {
         });
     }
 
+    function history() {
+        $.ajax({
+            type: "GET",
+            url: apiUrlHistory,
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            success: function (response) {
+                const transactionContainer = $("#transactionContainer");
+
+                response.data.records.forEach(function (transaction) {
+                    const transactionType = transaction.transaction_type;
+                    const description = transaction.description;
+                    const totalAmount = transaction.total_amount;
+                    const createdOn = transaction.created_on;
+
+                    const amountClass = transactionType === 'TOPUP' ? 'text-green-500' : 'text-red-500';
+                    const amountSign = transactionType === 'TOPUP' ? '+' : '-';
+
+                    const transactionElement = `
+                        <div class="flex flex-col bg-white p-4 rounded-lg shadow-md w-full mb-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-lg font-bold ${amountClass}">${amountSign} Rp ${formatRupiah(totalAmount)}</p>
+                                <p class="text-lg font-bold text-gray-800">${description}</p>
+                            </div>
+                            <p class="text-sm" id="transaction_created">${formateDateTime(createdOn)}</p>
+                        </div>
+                    `;
+
+                    transactionContainer.append(transactionElement);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
     function getServiceNameTarifIcon() {
         const urlParams = new URLSearchParams(window.location.search);
         const serviceName = urlParams.get('service_name');
@@ -302,6 +349,19 @@ $(document).ready(function () {
         });
     }
 
+    function formateDateTime(timeParams) {
+        const options = {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        };
+
+        const dateTime = new Date(timeParams);
+        const formattedDate = dateTime.toLocaleDateString("id-ID", options);
+        return formattedDate;
+    }
 
     ajaxProfile();
     ajaxBalance();
@@ -309,5 +369,6 @@ $(document).ready(function () {
     ajaxBanner();
     topUp();
     transaction();
+    history();
     getServiceNameTarifIcon();
 });

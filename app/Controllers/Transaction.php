@@ -10,4 +10,9 @@ class Transaction extends BaseController
     {
         return view('transaction/index');
     }
+
+    public function history()
+    {
+        return view('transaction/history');
+    }
 }

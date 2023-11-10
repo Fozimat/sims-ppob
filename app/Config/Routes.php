@@ -11,3 +11,4 @@ $routes->get('/login', 'Registration::login');
 $routes->get('/homepage', 'HomePage::index');
 $routes->get('/topup', 'TopUp::index');
 $routes->get('/transaction', 'Transaction::index/$1');
+$routes->get('/transaction/history', 'Transaction::history');
