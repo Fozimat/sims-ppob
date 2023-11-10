@@ -30,6 +30,27 @@ $(document).ready(function () {
         });
     }
 
+    function ajaxAkun() {
+        $.ajax({
+            type: "GET",
+            url: apiUrlProfile,
+            headers: {
+                "Authorization": 'Bearer ' + token,
+            },
+            success: function (response) {
+                $("#full_name").text(response.data.first_name + ' ' + response.data.last_name);
+                $("#email").val(response.data.email);
+                $("#first_name").val(response.data.first_name);
+                $("#last_name").val(response.data.last_name);
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+                alert("Terjadi kesalahan saat mengambil data profile. Silakan coba lagi nanti.");
+                window.location.href = "login";
+            }
+        });
+    }
+
     function topUp() {
         let selectedButton = null;
 
@@ -370,6 +391,12 @@ $(document).ready(function () {
         return formattedDate;
     }
 
+    function editProfile() {
+        $("#btn_edit_profile").click(function () {
+            alert("Fitur dalam pengembangan.");
+        });
+    }
+
     function logout() {
         $('#btn_logout').click(function () {
             localStorage.removeItem('token');
@@ -410,6 +437,11 @@ $(document).ready(function () {
         history();
     }
 
+    if (window.location.pathname === '/akun') {
+        ajaxAkun();
+    }
+
     checkToken();
+    editProfile();
     logout();
 });
