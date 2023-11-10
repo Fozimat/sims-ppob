@@ -173,6 +173,7 @@ $(document).ready(function () {
         lihatSaldoButton.click(function () {
             if (saldoVisible) {
                 saldoValue.text("********");
+                $('#lihat-saldo-button').text('Lihat Saldo');
                 saldoVisible = false;
             } else {
                 $.ajax({
@@ -183,6 +184,7 @@ $(document).ready(function () {
                     },
                     success: function (response) {
                         saldoValue.text(`${formatRupiah(response.data.balance)}`);
+                        $('#lihat-saldo-button').text('Tutup Saldo');
                         saldoVisible = true;
                     },
                     error: function (xhr, status, error) {
@@ -263,27 +265,32 @@ $(document).ready(function () {
             success: function (response) {
                 const transactionContainer = $("#transactionContainer");
 
-                response.data.records.forEach(function (transaction) {
-                    const transactionType = transaction.transaction_type;
-                    const description = transaction.description;
-                    const totalAmount = transaction.total_amount;
-                    const createdOn = transaction.created_on;
+                if (response.data.records.length > 0) {
+                    response.data.records.forEach(function (transaction) {
+                        const transactionType = transaction.transaction_type;
+                        const description = transaction.description;
+                        const totalAmount = transaction.total_amount;
+                        const createdOn = transaction.created_on;
 
-                    const amountClass = transactionType === 'TOPUP' ? 'text-green-500' : 'text-red-500';
-                    const amountSign = transactionType === 'TOPUP' ? '+' : '-';
+                        const amountClass = transactionType === 'TOPUP' ? 'text-green-500' : 'text-red-500';
+                        const amountSign = transactionType === 'TOPUP' ? '+' : '-';
 
-                    const transactionElement = `
-                        <div class="flex flex-col bg-white p-4 rounded-lg shadow-md w-full mb-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-lg font-bold ${amountClass}">${amountSign} Rp ${formatRupiah(totalAmount)}</p>
-                                <p class="text-lg font-bold text-gray-800">${description}</p>
+                        const transactionElement = `
+                            <div class="flex flex-col bg-white p-4 rounded-lg shadow-md w-full mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-lg font-bold ${amountClass}">${amountSign} Rp ${formatRupiah(totalAmount)}</p>
+                                    <p class="text-lg font-bold text-gray-800">${description}</p>
+                                </div>
+                                <p class="text-sm" id="transaction_created">${formateDateTime(createdOn)}</p>
                             </div>
-                            <p class="text-sm" id="transaction_created">${formateDateTime(createdOn)}</p>
-                        </div>
-                    `;
+                        `;
 
-                    transactionContainer.append(transactionElement);
-                });
+                        transactionContainer.append(transactionElement);
+                    });
+                } else {
+                    const noDataMessage = '<p class="text-md text-gray-500 text-center">Maaf, tidak ada history transaksi saat ini</p>';
+                    transactionContainer.append(noDataMessage);
+                }
             },
             error: function (xhr, status, error) {
                 console.error("Error:", error);
@@ -370,21 +377,39 @@ $(document).ready(function () {
         });
     }
 
-
     function checkToken() {
         if (!token) {
             window.location.href = "login";
             alert("Anda wajib login");
         }
     }
+
+    if (window.location.pathname === '/homepage') {
+        ajaxProfile();
+        ajaxBalance();
+        ajaxServices();
+        ajaxBanner();
+    }
+
+    if (window.location.pathname === '/topup') {
+        ajaxProfile();
+        ajaxBalance();
+        topUp();
+    }
+
+    if (window.location.pathname === '/transaction') {
+        ajaxProfile();
+        ajaxBalance();
+        transaction();
+        getServiceNameTarifIcon();
+    }
+
+    if (window.location.pathname === '/transaction/history') {
+        ajaxProfile();
+        ajaxBalance();
+        history();
+    }
+
     checkToken();
-    ajaxProfile();
-    ajaxBalance();
-    ajaxServices();
-    ajaxBanner();
-    topUp();
-    transaction();
-    history();
-    getServiceNameTarifIcon();
     logout();
 });
