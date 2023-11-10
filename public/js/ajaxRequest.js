@@ -363,6 +363,21 @@ $(document).ready(function () {
         return formattedDate;
     }
 
+    function logout() {
+        $('#btn_logout').click(function () {
+            localStorage.removeItem('token');
+            window.location.href = "login";
+        });
+    }
+
+
+    function checkToken() {
+        if (!token) {
+            window.location.href = "login";
+            alert("Anda wajib login");
+        }
+    }
+    checkToken();
     ajaxProfile();
     ajaxBalance();
     ajaxServices();
@@ -371,4 +386,5 @@ $(document).ready(function () {
     transaction();
     history();
     getServiceNameTarifIcon();
+    logout();
 });
