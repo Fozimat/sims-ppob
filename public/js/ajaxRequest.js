@@ -411,6 +411,8 @@ $(document).ready(function () {
         }
     }
 
+    checkToken();
+
     if (window.location.pathname === '/homepage') {
         ajaxProfile();
         ajaxBalance();
@@ -439,9 +441,7 @@ $(document).ready(function () {
 
     if (window.location.pathname === '/akun') {
         ajaxAkun();
+        editProfile();
+        logout();
     }
-
-    checkToken();
-    editProfile();
-    logout();
 });
